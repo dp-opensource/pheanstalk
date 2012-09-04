@@ -158,10 +158,10 @@ abstract class AbstractWorker {
 
 ####Exception handling
 
-In the Case that something goes wrong you can throw an Exception in your work-function.
+In the Case that something goes wrong you can throw an Exception in your work-method.
 The pre-defined behaviour is that a NoRetryException cancels the job and any other Exception will cause the job to be delayed for 3 minutes.
 
-It can come in handy to customize the Exception handling so we left you the option to change it to your needs. The Exception handling is defined in the processJob-Function.
+It can come in handy to customize the Exception handling so we left you the option to change it to your needs. The Exception handling is defined in the processJob-method.
 
 ###Datatransformers
 
