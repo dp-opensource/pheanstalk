@@ -3,7 +3,7 @@ PheanstalkBundle
 
 A simple pheanstalk-bundle for Symfony
 
-#Installation
+# Installation
 ## Symfony 2.0
 ### A) Download DigitalPioneersPheanstalkBundle and the dependencies
 Add the following lines in your `deps` file:
@@ -66,18 +66,45 @@ public function registerBundles()
 
 TODO
 
-#Message Queue System - beanstalkd
+# Usage
+## Tubes and Workers
+First of all you have to define Tubes (extending [AbstractTube](https://github.com/digitalpioneers/pheanstalk/blob/master/DependencyInjection/MessageQueue/Tubes/AbstractTube.php)) and Workers (extending [AbstractWorker](https://github.com/digitalpioneers/pheanstalk/blob/master/DependencyInjection/MessageQueue/Worker/AbstractWorker.php)) fitting your use-case.
+There is an example [tube](https://github.com/digitalpioneers/pheanstalk/blob/master/DependencyInjection/MessageQueue/Tubes/SimpleSumTube.php) and [worker](https://github.com/digitalpioneers/pheanstalk/blob/master/DependencyInjection/MessageQueue/Worker/SimpleSumWorker.php) contained within this project.
 
-##What's here?
+### Registration
+You need to register your tubes and worker with the project you do that by adding them to your [services-config-file](https://github.com/digitalpioneers/pheanstalk/blob/master/Resources/config/services.xml).
+
+``` xml
+<!-- pheanstalk - Example tube/worker implementation -->
+<service id="pheanstalk.queue.worker.simple_sum_worker" class="DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\Worker\SimpleSumWorker" />
+<service id="pheanstalk.queue.tube.simple_sum" class="DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\Tubes\SimpleSumTube">
+    <argument type="service" id="pheanstalk.queue.data_transform.json" />
+    <argument type="service" id="pheanstalk.queue.worker.simple_sum_worker" />
+    <tag name="pheanstalk.queue.worker" />
+</service>
+```
+
+Don't forget to give your tube a 'pheanstalk.queue.worker'-Tag. ;)
+
+## Adding jobs to a tube
+``` php
+$queue = $this->get('pheanstalk.queue');
+$simpleSumTube = $this->get('pheanstalk.queue.tube.simple_sum');
+$queue->put($simpleSumTube, array(2, 5, 10));
+```
+
+# Message Queue System - beanstalkd
+
+## What's here?
 
 A detailed documentation on our Message Queueing system, [beanstalkd](http://kr.github.com/beanstalkd/).
 
-##Overview
+## Overview
 
 The message queue is designed to make cup/time intensive tasks asynchronous to the users request.
 This feature can be useful when a task fires a request to a web-service.
 
-##The Components
+## The Components
 
 The system is splitted into 4 different components.
 
@@ -98,11 +125,11 @@ Flow:
 
 The workers are running using Symfony2 Commands `app/console dp-pheanstalk:worker [n]` where 'n' defines the number of tasks the worker will complete before he dies, default is 100 jobs. This is necessary b/c of the memory management of php, so we avoid memleaks this way.
 
-###Queue
+### Queue
 
 It's a simple wrapper of the 'pheanstalk' library. Almost no need to make changes here. It enriches the data with some meta informations to enables the worker to chosse the correct tube.
 
-###Tubes
+### Tubes
 
 To define a tube you only have to choose a name for it. See a reference implementation. If you have the need of changes the default values you can simple overwrite them. We use getters for this values.
 
@@ -123,7 +150,7 @@ abstract class AbstractTube {
 }
 ```
 
-###Worker
+### Worker
 
 The workers in the system does the real job, like talking to the apis or do some calculations.
 You have to inherit from AbstractWorker
@@ -156,14 +183,14 @@ abstract class AbstractWorker {
 }
 ```
 
-####Exception handling
+#### Exception handling
 
 In the Case that something goes wrong you can throw an Exception in your work-method.
 The pre-defined behaviour is that a NoRetryException cancels the job and any other Exception will cause the job to be delayed for 3 minutes.
 
 It can come in handy to customize the Exception handling so we left you the option to change it to your needs. The Exception handling is defined in the processJob-method.
 
-###Datatransformers
+### Datatransformers
 
 The last part in the MQ system are the 'data transformers'. The only job they have to archieve is that the data goes into a queue friendly format and the way back.
 
