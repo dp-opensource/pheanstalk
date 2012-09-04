@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <!-- pheanstalk - beanstalkd -->
+        <service id="pheanstalk.queue" class="DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\Pheanstalk">
+            <argument type="service" id="pheanstalk"></argument>
+            <argument type="service" id="logger" />
+        </service>
+
+        <!-- pheanstalk - Tube Collection -->
+        <service id="pheanstalk.queue.tube_collection" class="DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\TubeCollection" />
+
+        <!-- pheanstalk - DataTransformer -->
+        <service id="pheanstalk.queue.data_transform.json" class="DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\DataTransformer\JsonTransform" />
+        <service id="pheanstalk.queue.data_transform.serialize" class="DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\DataTransformer\SerializeTransform" />
+
+        <!-- pheanstalk - Example tube/worker implementation -->
+        <service id="pheanstalk.queue.worker.simple_sum_worker" class="DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\Worker\SimpleSumWorker" />
+        <service id="pheanstalk.queue.tube.simple_sum" class="DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\Tubes\SimpleSumTube">
+            <argument type="service" id="pheanstalk.queue.data_transform.json" />
+            <argument type="service" id="pheanstalk.queue.worker.simple_sum_worker" />
+            <tag name="pheanstalk.queue.worker" />
+        </service>
+    </services>
+</container>
