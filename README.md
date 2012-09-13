@@ -18,7 +18,7 @@ Add the following lines in your `deps` file:
     target=/bundles/drymek/PheanstalkBundle
 
 [DigitalPioneersPheanstalkBundle]
-    git=git://github.com/digitalpioneers/PheanstalkBundle.git
+    git=git://github.com/digitalpioneers/pheanstalk.git
     target=bundles/DigitalPioneers/PheanstalkBundle
 ```
 
