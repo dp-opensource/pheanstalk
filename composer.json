@@ -6,7 +6,7 @@
     "homepage": "http://www.digitalpioneers.de",
     "repositories": [
         {
-            "type": "vcs",
+            "type": "git",
             "url": "https://github.com/drymek/PheanstalkBundle"
         }
     ],
