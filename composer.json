@@ -18,6 +18,7 @@
         "symfony/event-dispatcher": "*"
     },
     "autoload": {
-        "psr-0": {"DigitalPioneers\\PheanstalkBundle": ""}
+        "psr-0": {"DigitalPioneers\\PheanstalkBundle": ""},
+        "target-dir": "DigitalPioneers/PheanstalkBundle"
     }
 }
