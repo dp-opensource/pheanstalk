@@ -7,7 +7,7 @@
     "repositories": [
         {
             "type": "git",
-            "url": "https://github.com/drymek/PheanstalkBundle"
+            "url": "https://github.com/drymek/PheanstalkBundle.git"
         }
     ],
     "require": {
