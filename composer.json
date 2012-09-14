@@ -6,16 +6,8 @@
     "homepage": "http://www.digitalpioneers.de",
     "repositories": [
         {
-            "type": "package",
-            "package": {
-                "name": "drymek/PheanstalkBundle",
-                "version": "dev-master",
-                "source": {
-                    "url": "https://github.com/drymek/PheanstalkBundle.git",
-                    "type": "git",
-                    "reference": "master"
-                }
-            }
+            "type": "vcs",
+            "url": "https://github.com/Senci/PheanstalkBundle.git"
         }
     ],
     "require": {
