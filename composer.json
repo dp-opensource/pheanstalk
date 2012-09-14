@@ -19,6 +19,6 @@
     },
     "autoload": {
         "psr-0": {"DigitalPioneers\\PheanstalkBundle": ""},
-        "target-dir": "DigitalPioneers/PheanstalkBundle"
+        "target-dir": "bundles/DigitalPioneers/PheanstalkBundle"
     }
 }
