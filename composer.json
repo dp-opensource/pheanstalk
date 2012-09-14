@@ -4,6 +4,16 @@
     "description": "A simple pheanstalk-bundle for Symfony",
     "keywords": ["beanstalkd", "pheanstalk", "queue"],
     "homepage": "http://www.digitalpioneers.de",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/mrpoundsign/pheanstalk"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/drymek/PheanstalkBundle"
+        }
+    ],
     "require": {
         "php": ">=5.3.1",
         "symfony/symfony": "2.1.*",
