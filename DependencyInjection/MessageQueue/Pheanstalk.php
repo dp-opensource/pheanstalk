@@ -4,6 +4,9 @@ namespace DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue;
 
 use DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\Tubes\AbstractTube;
 
+/**
+ * Pheanstalk is a Queue-Implementation with is used to put new jobs into the queue.
+ */
 class Pheanstalk extends AbstractQueue
 {
 
@@ -33,7 +36,8 @@ class Pheanstalk extends AbstractQueue
      * @param mixed $data Data which will be transformed to json and put into the mq.
      * @return int job id
      */
-    protected function fallBack($tube, $data) {
+    protected function fallBack($tube, $data)
+    {
         try {
             $tube->getWorker()->work($data, null, null);
         } catch (\Exception $e) {
@@ -42,11 +46,7 @@ class Pheanstalk extends AbstractQueue
     }
 
     /**
-     * Puts an Job into the MQ.
-     *
-     * @param AbstractTube $tube
-     * @param mixed $data Data which will be transformed to json and put into the mq.
-     * @return int job id
+     * @inheritdoc
      */
     public function put(AbstractTube $tube, $data)
     {
@@ -57,7 +57,12 @@ class Pheanstalk extends AbstractQueue
 
         $success = false;
         try {
-            $success = $this->pheanstalk->put(json_encode($workload), $tube->getPriority(), $tube->getDelay(), $tube->getTtr());
+            $success = $this->pheanstalk->put(
+                json_encode($workload),
+                $tube->getPriority(),
+                $tube->getDelay(),
+                $tube->getTtr()
+            );
         } catch (\Pheanstalk\Exception $e) {
             $this->fallBack($tube, $data);
         }

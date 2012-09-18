@@ -7,12 +7,14 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/Senci/PheanstalkBundle.git"
+            "url": "https://github.com/drymek/PheanstalkBundle.git"
         }
     ],
     "require": {
         "php": ">=5.3.1",
         "symfony/symfony": "2.1.*",
+        "symfony/monolog-bundle": "2.1.*",
+        "EHER/PHPUnit": "1.*",
         "mrpoundsign/pheanstalk-5.3": "*",
         "drymek/PheanstalkBundle": "*",
         "symfony/event-dispatcher": "*"
@@ -20,5 +22,6 @@
     "autoload": {
         "psr-0": {"DigitalPioneers": ""}
     },
-    "target-dir": "DigitalPioneers/PheanstalkBundle"
+    "target-dir": "DigitalPioneers/PheanstalkBundle",
+    "minimum-stability": "dev"
 }

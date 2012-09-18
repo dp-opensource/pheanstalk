@@ -2,6 +2,10 @@
 
 namespace DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue;
 
+/**
+ * The TubeCollection contains all tubes which are considered by pheanstalk.
+ * To register a tube you must tag your tube-service with "pheanstalk.queue.worker".
+ */
 class TubeCollection
 {
     /**
@@ -9,6 +13,9 @@ class TubeCollection
      */
     protected $collection;
 
+    /**
+     * Constructor
+     */
     public function __construct()
     {
         $this->collection = new \SplObjectStorage();
@@ -26,8 +33,9 @@ class TubeCollection
     /**
      * @return \SplObjectStorage
      */
-    public function getCollection() {
+    public function getCollection()
+    {
         return $this->collection;
     }
-
 }
+

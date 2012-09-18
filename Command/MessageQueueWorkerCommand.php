@@ -15,25 +15,48 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
-class MessageQueueWorkerCommand extends ContainerAwareCommand {
-    protected function configure() {
-        $this->setName('dp-pheanstalk:worker')
+/**
+ * A CLI to start the workers
+ * you can start it with the shell command "app/console pheanstalk:worker {jobsToProcess = null}"
+ */
+class MessageQueueWorkerCommand extends ContainerAwareCommand
+{
+    protected function configure()
+    {
+        $this->setName('pheanstalk:worker')
             ->setDescription('Starts an worker for the pheanstalk message queue.')
-            ->addArgument('loops', InputArgument::OPTIONAL, 'Defines how many working loops the worker will do before dying.', 100);
+            ->addArgument(
+                'loops',
+                InputArgument::OPTIONAL,
+                'Defines how many working loops the worker will do before dying.',
+                100
+            );
     }
-    protected function execute(InputInterface $input, OutputInterface $output) {
+
+    /**
+     * The main method getting executed after start
+     *
+     * @param \Symfony\Component\Console\Input\InputInterface $input
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     */
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
         $output->writeln('loading services');
-        $pheanstalk = $this->getContainer()->get('pheanstalk'); /* @var $pheanstalk \Pheanstalk\Pheanstalk */
-        $logger = $this->getContainer()->get('logger'); /* @var $logger \Symfony\Bridge\Monolog\Logger */
+        $pheanstalk = $this->getContainer()->get('pheanstalk');
+        /* @var $pheanstalk \Pheanstalk\Pheanstalk */
+        $logger = $this->getContainer()->get('logger');
+        /* @var $logger \Symfony\Bridge\Monolog\Logger */
         $dispatcher = new EventDispatcher();
         $dispatcher->dispatch(PheanstalkEvents::GET_CONTAINER, new GetContainerEvent($this->getContainer()));
-        $tubeCollection = $this->getContainer()->get('pheanstalk.queue.tube_collection'); /* @var $tubeCollection \DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\TubeCollection */
+        $tubeCollection = $this->getContainer()->get('pheanstalk.queue.tube_collection');
+        /* @var $tubeCollection \DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\TubeCollection */
         $dispatcher->dispatch(PheanstalkEvents::STARTED, new TimeEvent(microtime(true)));
 
         $worker = array();
         $dataTransformer = array();
         $output->writeln('setting up tubes');
-        foreach ($tubeCollection->getCollection() as $tube) { /* @var $tube \DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\Tubes\AbstractTube */
+        foreach ($tubeCollection->getCollection() as $tube) {
+            /* @var $tube \DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\Tubes\AbstractTube */
             $worker[$tube->getName()] = $tube->getWorker();
             $dataTransformer[$tube->getName()] = $tube->getDataTransformer();
             $pheanstalk->watch($tube->getName());
@@ -43,15 +66,24 @@ class MessageQueueWorkerCommand extends ContainerAwareCommand {
         for ($i = 0; $i < $input->getArgument('loops'); $i++) {
             $waitingStarted = microtime(true);
             $output->write(sprintf('Reading for job (#%d)...', $i));
-            $job = $pheanstalk->reserve(); /* @var $job \Pheanstalk\Job*/
+            $job = $pheanstalk->reserve();
+            /* @var $job \Pheanstalk\Job*/
             $dispatcher->dispatch(PheanstalkEvents::JOB_STARTED, new TimeEvent(microtime(true)));
             $waitingTime = microtime(true) - $waitingStarted;
             $dispatcher->dispatch(PheanstalkEvents::WAITING_TIME, new WaitingTimeEvent($waitingTime * 1000));
             $workload = json_decode($job->getData());
             $output->write(sprintf(' got a job! [%s] Start heavy computing...', $workload->tube));
-            $worker[$workload->tube]->processJob($dataTransformer[$workload->tube]->wakeupData($workload->data), $job, $pheanstalk, $workload->tube, $output, $logger);
+            $worker[$workload->tube]->processJob(
+                $dataTransformer[$workload->tube]->wakeupData($workload->data),
+                $job,
+                $pheanstalk,
+                $workload->tube,
+                $output,
+                $logger
+            );
             $dispatcher->dispatch(PheanstalkEvents::JOB_DONE, new JobDoneEvent($workload->tube, microtime(true)));
         }
         $dispatcher->dispatch(PheanstalkEvents::DONE, new TimeEvent(microtime(true)));
     }
 }
+

@@ -1,7 +1,11 @@
 <?php
 namespace DigitalPioneers\PheanstalkBundle\DependencyInjection\Events;
 
-final class PheanstalkEvents {
+/**
+ * A helper class which holds the tags of all events supported by Pheanstalk
+ */
+final class PheanstalkEvents
+{
     /**
      * The pheanstalk.started event is thrown each time the MessageQueueWorkerCommand is started.
      */
@@ -35,3 +39,4 @@ final class PheanstalkEvents {
      */
     const GET_CONTAINER = 'pheanstalk.get_container';
 }
+

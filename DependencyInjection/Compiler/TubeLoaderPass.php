@@ -14,6 +14,11 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
  */
 class TubeLoaderPass implements CompilerPassInterface
 {
+    /**
+     * Adds all Tubes tagged with "pheanstalk.queue.worker" to the TubeCollection
+     *
+     * @param \Symfony\Component\DependencyInjection\ContainerBuilder $container
+     */
     public function process(ContainerBuilder $container)
     {
         if (false === $container->hasDefinition('pheanstalk.queue.tube_collection')) {
@@ -34,3 +39,4 @@ class TubeLoaderPass implements CompilerPassInterface
         $definition->setMethodCalls(array_merge($definition->getMethodCalls(), $calls));
     }
 }
+

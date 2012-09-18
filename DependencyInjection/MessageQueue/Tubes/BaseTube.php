@@ -6,7 +6,11 @@ use DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\DataTransf
 use DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\Worker\AbstractWorker;
 use DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\Exceptions\TubeException;
 
-class BaseTube extends AbstractTube {
+/**
+ * Base-Implementation of a Tube. You can inherit from BaseTube and modify your tube to your needs.
+ */
+class BaseTube extends AbstractTube
+{
 
     /**
      * Name of the Tube.
@@ -54,7 +58,7 @@ class BaseTube extends AbstractTube {
      */
     protected $tr = 10;
 
-    public final function __construct(AbstractDataTransformer $transform, AbstractWorker $worker)
+    final public function __construct(AbstractDataTransformer $transform, AbstractWorker $worker)
     {
         $this->transform = $transform;
         $this->worker = $worker;
@@ -65,7 +69,7 @@ class BaseTube extends AbstractTube {
      *
      * @return string
      */
-    public final function getName()
+    final public function getName()
     {
         return $this->name;
     }
@@ -75,7 +79,7 @@ class BaseTube extends AbstractTube {
      *
      * @return integer
      */
-    public final function getPriority()
+    final public function getPriority()
     {
         return $this->priority;
     }
@@ -85,7 +89,7 @@ class BaseTube extends AbstractTube {
      *
      * @return integer
      */
-    public final function getDelay()
+    final public function getDelay()
     {
         return $this->delay;
     }
@@ -95,7 +99,7 @@ class BaseTube extends AbstractTube {
      *
      * @return integer
      */
-    public final function getTtr()
+    final public function getTtr()
     {
         return $this->tr;
     }
@@ -103,11 +107,12 @@ class BaseTube extends AbstractTube {
     /**
      * Returns data transformer
      *
-     * @return \DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\DataTransformer\AbstractDataTransformer
+     * @return AbstractDataTransformer
+     * @throws TubeException
      */
-    public final function getDataTransformer()
+    final public function getDataTransformer()
     {
-        if(!$this->transform) {
+        if (!$this->transform) {
             throw new TubeException('Data transformer not set');
         }
         return $this->transform;
@@ -116,14 +121,16 @@ class BaseTube extends AbstractTube {
     /**
      * Returns worker
      *
-     * @return \DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\Worker\AbstractWorker
+     * @return AbstractWorker
+     * @throws TubeException
      */
-    public final function getWorker()
+    final public function getWorker()
     {
-        if(!$this->worker) {
+        if (!$this->worker) {
             throw new TubeException('Worker not set');
         }
         return $this->worker;
     }
 
 }
+

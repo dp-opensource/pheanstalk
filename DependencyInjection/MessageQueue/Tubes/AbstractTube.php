@@ -2,7 +2,16 @@
 
 namespace DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\Tubes;
 
-abstract class AbstractTube {
+use DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\DataTransformer\AbstractDataTransformer;
+use DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\Worker\AbstractWorker;
+
+/**
+ * An Abstract class of a Tube.
+ * Tubes are used to determine which Worker and DataTransformer should get used on a job and with which properties
+ * (like priority, delay, time-to-run) a job gets processed.
+ */
+abstract class AbstractTube
+{
 
     /**
      * Name of the Tube.
@@ -46,14 +55,15 @@ abstract class AbstractTube {
 
     /**
      * @abstract
-     * @return \DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\DataTransformer\AbstractDataTransformer
+     * @return AbstractDataTransformer
      */
     abstract public function getDataTransformer();
 
     /**
      * @abstract
-     * @return \DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\Worker\AbstractWorker
+     * @return AbstractWorker
      */
     abstract public function getWorker();
 
 }
+

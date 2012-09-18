@@ -11,3 +11,4 @@ namespace DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\Exce
 class NoRetryException extends \Exception
 {
 }
+

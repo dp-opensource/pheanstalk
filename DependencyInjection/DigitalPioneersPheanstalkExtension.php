@@ -26,3 +26,4 @@ class DigitalPioneersPheanstalkExtension extends Extension
         $loader->load('services.xml');
     }
 }
+
