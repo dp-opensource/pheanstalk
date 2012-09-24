@@ -5,7 +5,8 @@ A simple pheanstalk-bundle for Symfony
 
 # Installation
 ## Symfony 2.0
-### A) Download DigitalPioneersPheanstalkBundle and the dependencies
+### I. Download DigitalPioneersPheanstalkBundle and the dependencies
+
 Add the following lines in your `deps` file:
 
 ```
@@ -28,7 +29,7 @@ Now, run the vendors script to download the bundle:
 $ php bin/vendors install
 ```
 
-### B) Configure the Autoloader
+### II. Configure the Autoloader
 
 Add the `DigitalPioneers`, `Pheanstalk` and `drymek` namespace to your autoloader:
 
@@ -44,14 +45,12 @@ $loader->registerNamespaces(array(
 ));
 ```
 
-### C) Enable the bundle
+### III. Enable the bundles
 
-Finally, enable the bundles in the kernel:
+Finally, enable the bundles by adding them to the AppKernel.php:
 
 ``` php
 <?php
-// app/AppKernel.php
-
 public function registerBundles()
 {
     $bundles = array(
@@ -64,15 +63,64 @@ public function registerBundles()
 
 ## Symfony 2.1
 
-TODO
+### I. Install the dependencies
+#### A) Register packages as repositories
+
+As the drymek/PheanstalkBundle and our bundle have not yet found their way into packagist you will have to register these as packages first.
+Register the `drymek/PheanstalkBundle` and this bundle as repository by adding the following lines to your `composer.json`:
+``` json
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/digitalpioneers/pheanstalk.git"
+        },
+        {
+            "type": "git",
+            "url": "https://github.com/drymek/PheanstalkBundle.git"
+        }
+    ],
+```
+For a more detailed explanation on vcs-repositories take a look at the [official documentation](http://getcomposer.org/doc/05-repositories.md#vcs).
+
+#### B) Add the bundles
+
+Add our bundle to your `composer.json` by adding this bundle to the require-section of your `composer.json`:
+
+``` json
+    "require": {
+        "digitalpioneers/pheanstalk": "*"
+    },
+```
+
+#### C) Install dependencies
+
+To install our bundle and all dependencies run `php composer.phar install`.
+
+### II. Enable the bundles
+
+Finally, enable the bundles by adding them to the AppKernel.php:
+
+``` php
+<?php
+public function registerBundles()
+{
+    $bundles = array(
+        // ...
+        new drymek\PheanstalkBundle\drymekPheanstalkBundle(),
+        new DigitalPioneers\PheanstalkBundle\DigitalPioneersPheanstalkBundle(),
+    );
+}
+```
 
 # Usage
 ## Tubes and Workers
+
 First of all you have to define Tubes (extending [AbstractTube](https://github.com/digitalpioneers/pheanstalk/blob/master/DependencyInjection/MessageQueue/Tubes/AbstractTube.php)) and Workers (extending [AbstractWorker](https://github.com/digitalpioneers/pheanstalk/blob/master/DependencyInjection/MessageQueue/Worker/AbstractWorker.php)) fitting your use-case.
 There is an example [tube](https://github.com/digitalpioneers/pheanstalk/blob/master/DependencyInjection/MessageQueue/Tubes/SimpleSumTube.php) and [worker](https://github.com/digitalpioneers/pheanstalk/blob/master/DependencyInjection/MessageQueue/Worker/SimpleSumWorker.php) contained within this project.
 
 ### Registration
-You need to register your tubes and worker with the project you do that by adding them to your [services-config-file](https://github.com/digitalpioneers/pheanstalk/blob/master/Resources/config/services.xml).
+
+You need to register your tubes and worker with the project by adding them to your [services-config-file](https://github.com/digitalpioneers/pheanstalk/blob/master/Resources/config/services.xml).
 
 ``` xml
 <!-- pheanstalk - Example tube/worker implementation -->
@@ -84,14 +132,22 @@ You need to register your tubes and worker with the project you do that by addin
 </service>
 ```
 
-Don't forget to give your tube a 'pheanstalk.queue.worker'-Tag. ;)
+It is important to tag your tubes with the `pheanstalk.queue.worker`-tag in order to get them loaded.
 
 ## Adding jobs to a tube
+
 ``` php
 $queue = $this->get('pheanstalk.queue');
-$simpleSumTube = $this->get('pheanstalk.queue.tube.simple_sum');
-$queue->put($simpleSumTube, array(2, 5, 10));
+$tube = $this->get('pheanstalk.queue.tube.simple_sum');
+$data = array(2, 5, 10);
+$queue->put($tube, $data);
 ```
+
+## Starting the queue worker
+
+We have written a [command](http://symfony.com/doc/2.0/components/console/introduction.html) which starts the workers. You can use it by running `php app/console pheanstalk:worker`.
+
+By default our command is processing 100 jobs you can modify this number by adding it as an argument. (e.g. `php app/console pheanstalk:worker 42` will process 42 jobs)
 
 # Message Queue System - beanstalkd
 
