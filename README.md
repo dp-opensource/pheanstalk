@@ -1,7 +1,21 @@
 PheanstalkBundle
 ================
 
-A simple pheanstalk-bundle for Symfony
+This symfony-bundle is a simple implementation of the [beanstalkd](http://kr.github.com/beanstalkd/) work queue.
+
+It is designed to decouple time intensive tasks from the user request. The advantage is that the request is processed faster this way, which leads to shorter response times.
+
+## When to use it
+
+The requirements to the System:
+* The response has to be independent to the task in order to decouple it.
+* Tasks are being processed asynchronously to their requests, that's why tasks and requests shouldn't require to be processed at the same time.
+* The Data required to process a job has to be serializable.
+
+### Example
+
+An example use-case is a Notification-System which sends requests in order to dispatch notifications.
+In the usual work flow the request would have a longer response time because it has to send an extra request and await its response.
 
 # Installation
 ## Symfony 2.0
