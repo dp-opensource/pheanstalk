@@ -1,3 +1,6 @@
+[![Build Status](https://secure.travis-ci.org/digitalpioneers/pheanstalk.png)](http://travis-ci.org/digitalpioneers/pheanstalk)
+
+
 PheanstalkBundle
 ================
 
