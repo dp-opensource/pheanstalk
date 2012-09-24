@@ -18,7 +18,7 @@ An example use-case is a Notification-System which sends requests in order to di
 In the usual work flow the request would have a longer response time because it has to send an extra request and await its response.
 
 After setting up a [tube](#tubes), [worker](#worker) and [datatransformer](#datatransformers) jobs can be added to the Workqueue as easy as this:
-```php
+``` php
 $queue = $this->get('pheanstalk.queue');
 $tube = $this->get('pheanstalk.queue.tube.notifications');
 $data = array(
@@ -26,6 +26,23 @@ $data = array(
         'message' => 'You have unread messages.'
     );
 $queue->put($tube, $data);
+```
+
+An example worker implementation could look like this:
+``` php
+class SimpleSumWorker extends AbstractWorker
+{
+    protected $notificationsProcessor;
+
+    public function __construct(\MyNamespace\MyNotificationsProcessor $notoficationsProcessor) {
+     $this->notificationsProcessor = $notificationsProcessor;
+    }
+
+    public function work($data, \Pheanstalk\Job $job = null, \Pheanstalk\Pheanstalk $pheanstalk = null)
+    {
+        $this->notificationsProcessor->dispatch($data['recipient'], $data['message']);
+    }
+}
 ```
 
 To process the jobs you will have to run our worker command with `app/console pheanstalk:worker`.
