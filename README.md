@@ -17,7 +17,7 @@ The requirements to the System:
 An example use-case is a Notification-System which sends requests in order to dispatch notifications.
 In the usual work flow the request would have a longer response time because it has to send an extra request and await its response.
 
-After setting up a [tube](#tubes), [worker](#worker) and [datatransformer](#datatransformers) jobs can be added to the Workqueue as easy as this:
+After setting up a [tube](#tubes), [worker](#worker) and [datatransformer](#datatransformers) jobs can be added to the work queue as easy as this:
 ``` php
 $queue = $this->get('pheanstalk.queue');
 $tube = $this->get('pheanstalk.queue.tube.notifications');
@@ -30,12 +30,12 @@ $queue->put($tube, $data);
 
 An example worker implementation could look like this:
 ``` php
-class SimpleSumWorker extends AbstractWorker
+class NotificationsWorker extends AbstractWorker
 {
     protected $notificationsProcessor;
 
     public function __construct(\MyNamespace\MyNotificationsProcessor $notoficationsProcessor) {
-     $this->notificationsProcessor = $notificationsProcessor;
+        $this->notificationsProcessor = $notificationsProcessor;
     }
 
     public function work($data, \Pheanstalk\Job $job = null, \Pheanstalk\Pheanstalk $pheanstalk = null)
@@ -196,6 +196,16 @@ $queue->put($tube, $data);
 We have written a [command](http://symfony.com/doc/2.0/components/console/introduction.html) which starts the workers. You can use it by running `php app/console pheanstalk:worker`.
 
 By default our command is processing 100 jobs you can modify this number by adding it as an argument. (e.g. `php app/console pheanstalk:worker 42` will process 42 jobs)
+
+## Events and Hooks
+
+In some cases you might want to track what the worker is doing. We have integrated the [event dispatcher](http://symfony.com/doc/current/components/event_dispatcher/introduction.html) for that purpose.
+You can write [listeners](http://symfony.com/doc/current/components/event_dispatcher/introduction.html#connecting-listeners) and [subscribers](http://symfony.com/doc/current/components/event_dispatcher/introduction.html#using-event-subscribers) which will react to these events.
+
+The [PheanstalkStatsdSubscriber](https://github.com/digitalpioneers/pheanstalk/blob/master/DependencyInjection/Events/Subscribers/PheanstalkStatsdSubscriber.php) represents a sample implementation of a subscriber.
+It saves statistics to through the [StatsD-daemon](https://github.com/digitalpioneers/pheanstalk/blob/master/DependencyInjection/Events/Subscribers/PheanstalkStatsdSubscriber.php).
+
+A list of all supported events (with discription) can be found in the [PheanstalkEvents](https://github.com/digitalpioneers/pheanstalk/blob/master/DependencyInjection/Events/PheanstalkEvents.php).
 
 # Message Queue System - beanstalkd
 
