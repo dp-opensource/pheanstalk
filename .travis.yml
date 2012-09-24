@@ -3,9 +3,6 @@ php:
   - 5.4
 services: mysql
 install:
-  - pear config-set auto_discover 1 > /dev/null 2>&1
-  - pear install pear.phpqatools.org/phpqatools > /dev/null 2>&1
-  - phpenv rehash
   - php composer.phar install
 script:
-  - ant -f build.xml build-travis
+  - phpunit
