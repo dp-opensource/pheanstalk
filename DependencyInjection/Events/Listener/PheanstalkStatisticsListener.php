@@ -1,7 +1,6 @@
 <?php
-namespace DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\Subscribers;
+namespace DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\Listener;
 
-use DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\PheanstalkEvents;
 use DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\TimeEvent;
 use DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\GetContainerEvent;
 use DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\JobFailedEvent;
@@ -9,37 +8,19 @@ use DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\JobSuccessEvent;
 use DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\WaitingTimeEvent;
 use DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\JobDoneEvent;
 use Symfony\Component\EventDispatcher\Event;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerAware;
 
 /**
- * The PheanstalkStatsdSubscriber subscribes to PheanstalkEvents which are fired as symfony-events to fill statsd with
- * information.
+ * This is an example which demonstrates how to use the PheanstalkEvents to save statistics about the Worker.
+ * It is not functional and is not ready for use.
+ * The PheanstalkStatisticsListener has to be subscribed to PheanstalkEvents in order to work properly.
  */
-class PheanstalkStatsdSubscriber implements EventSubscriberInterface
+class PheanstalkStatisticsListener
 {
-    /* @var \StatsD\StatsD */
-    protected $statsd;
+    protected $statisticsClient;
     protected $startedTime;
     protected $jobStartedTime;
-
-    /**
-     * @inheritdoc
-     */
-    public static function getSubscribedEvents()
-    {
-        return array(
-            PheanstalkEvents::STARTED => array('onStarted', 0),
-            PheanstalkEvents::DONE => array('onDone', 0),
-            PheanstalkEvents::WAITING_TIME => array('onWaitingTime', 0),
-            PheanstalkEvents::JOB_STARTED => array('onJobStarted', 0),
-            PheanstalkEvents::JOB_SUCCEEDED => array('onJobSuccess', 0),
-            PheanstalkEvents::JOB_FAILED => array('onJobFailed', 0),
-            PheanstalkEvents::JOB_DONE => array('onJobDone', 0),
-            PheanstalkEvents::GET_CONTAINER => array('setupStatsd', 0)
-        );
-    }
 
     /**
      * Increments "worker.started" in statistics.
@@ -49,7 +30,7 @@ class PheanstalkStatsdSubscriber implements EventSubscriberInterface
      */
     public function onStarted(TimeEvent $event)
     {
-        $this->statsd->increment('Worker.started');
+        $this->statisticsClient[] = "->increment('Worker.started')";
         $this->startedTime = $event->getTime();
     }
 
@@ -62,7 +43,7 @@ class PheanstalkStatsdSubscriber implements EventSubscriberInterface
     public function onDone(TimeEvent $event)
     {
         $runningTime = $event->getTime() - $this->startedTime;
-        $this->statsd->timing('Worker.time', $runningTime * 1000);
+        $this->statisticsClient[] = "->timing('Worker.time', $runningTime * 1000)";
     }
 
     /**
@@ -73,7 +54,7 @@ class PheanstalkStatsdSubscriber implements EventSubscriberInterface
      */
     public function onWaitingTime(WaitingTimeEvent $event)
     {
-        $this->statsd->timing('Worker.waiting.time', $event->getWaitingTime());
+        $this->statisticsClient[] = "->timing('Worker.waiting.time', $event->getWaitingTime())";
     }
 
     /**
@@ -95,8 +76,8 @@ class PheanstalkStatsdSubscriber implements EventSubscriberInterface
      */
     public function onJobSuccess(JobSuccessEvent $event)
     {
-        $this->statsd->increment('Worker.jobs.success');
-        $this->statsd->increment('Worker.jobs.success.' . $event->getTube());
+        $this->statisticsClient[] = "->increment('Worker.jobs.success')";
+        $this->statisticsClient[] = "->increment('Worker.jobs.success.' . $event->getTube())";
     }
 
     /**
@@ -108,12 +89,12 @@ class PheanstalkStatsdSubscriber implements EventSubscriberInterface
      */
     public function onJobFailed(JobFailedEvent $event)
     {
-        $this->statsd->increment('Worker.jobs.failed');
-        $this->statsd->increment('Worker.jobs.failed' . $event->getTube());
+        $this->statisticsClient[] = "->increment('Worker.jobs.failed')";
+        $this->statisticsClient[] = "->increment('Worker.jobs.failed' . $event->getTube())";
         if ($event->isRetried()) {
-            $this->statsd->increment('Worker.jobs.failed.retried');
+            $this->statisticsClient[] = "->increment('Worker.jobs.failed.retried')";
         } else {
-            $this->statsd->increment('Worker.jobs.failed.deleted');
+            $this->statisticsClient[] = "->increment('Worker.jobs.failed.deleted')";
         }
     }
 
@@ -127,20 +108,21 @@ class PheanstalkStatsdSubscriber implements EventSubscriberInterface
     public function onJobDone(JobDoneEvent $event)
     {
         $jobTime = $event->getTime() - $this->jobStartedTime;
-        $this->statsd->increment('Worker.jobs.done');
-        $this->statsd->increment('Worker.jobs.done.' . $event->getTube());
-        $this->statsd->timing('Worker.jobs.time', $jobTime * 1000);
-        $this->statsd->timing('Worker.jobs.time.' . $event->getTube(), $jobTime * 1000);
+        $this->statisticsClient[] = "->increment('Worker.jobs.done')";
+        $this->statisticsClient[] = "->increment('Worker.jobs.done.'" . $event->getTube() . ")";
+        $this->statisticsClient[] = "->timing('Worker.jobs.time', . $jobTime * 1000)";
+        $this->statisticsClient[] = "->timing('Worker.jobs.time.' . $event->getTube(), $jobTime * 1000)";
     }
 
     /**
-     * Uses the Container from the Event to initialize statsd.
+     * Uses the Container from the Event to initialize the statistics client.
      *
      * @param \DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\GetContainerEvent $event
      */
-    public function setupStatsd(GetContainerEvent $event)
+    public function setupStatisticsClient(GetContainerEvent $event)
     {
-        $this->statsd = $event->getContainer()->get('statsd');
+        //$this->statisticsClient = $event->getContainer()->get('statisticsClient');
+        $this->statisticsClient = array();
     }
 }
 
