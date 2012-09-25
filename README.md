@@ -203,12 +203,32 @@ By default our command is processing 100 jobs you can modify this number by addi
 ## Events and Hooks
 
 In some cases you might want to track what the worker is doing. We have integrated the [event dispatcher](http://symfony.com/doc/current/components/event_dispatcher/introduction.html) for that purpose.
-You can write [listeners](http://symfony.com/doc/current/components/event_dispatcher/introduction.html#connecting-listeners) and [subscribers](http://symfony.com/doc/current/components/event_dispatcher/introduction.html#using-event-subscribers) which will react to these events.
+You can write [listeners](http://symfony.com/doc/current/components/event_dispatcher/introduction.html#connecting-listeners) which will react to these events.
 
-The [PheanstalkStatsdSubscriber](https://github.com/digitalpioneers/pheanstalk/blob/master/DependencyInjection/Events/Subscribers/PheanstalkStatsdSubscriber.php) represents a sample implementation of a subscriber.
-It saves statistics to through the [StatsD-daemon](https://github.com/digitalpioneers/pheanstalk/blob/master/DependencyInjection/Events/Subscribers/PheanstalkStatsdSubscriber.php).
+The [PheanstalkStatisticsListener](https://github.com/digitalpioneers/pheanstalk/blob/master/DependencyInjection/Events/Listener/PheanstalkStatisticsListener.php) represents a sample implementation of a listener.
+Although it is not functional, it should give developers enough information to write their own listener.
 
 A list of all supported events (with discription) can be found in the [PheanstalkEvents](https://github.com/digitalpioneers/pheanstalk/blob/master/DependencyInjection/Events/PheanstalkEvents.php).
+
+### Register a listener
+
+To register a listener you will have to register them as services and tag them properly.
+
+``` xml
+<!-- app/config/config.xml -->
+<service id="pheanstalk.listener.statistics" class="DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\Listener\PheanstalkStatisticsListener">
+    <tag name="kernel.event_listener" event="pheanstalk.started" method="onStarted" />
+    <tag name="kernel.event_listener" event="pheanstalk.done" method="onDone" />
+    <tag name="kernel.event_listener" event="pheanstalk.waiting_time" method="onWaitingTime" />
+    <tag name="kernel.event_listener" event="pheanstalk.jobs.started" method="onJobStarted" />
+    <tag name="kernel.event_listener" event="pheanstalk.jobs.success" method="onJobSuccess" />
+    <tag name="kernel.event_listener" event="pheanstalk.jobs.failed" method="onJobFailed" />
+    <tag name="kernel.event_listener" event="pheanstalk.jobs.done" method="onJobDone" />
+    <tag name="kernel.event_listener" event="pheanstalk.get_container" method="onGetContainer" />
+</service>
+```
+
+You can find further informations as well as code-samples for yml and php in the [official documentation](http://symfony.com/doc/current/cookbook/service_container/event_listener.html).
 
 # Message Queue System - beanstalkd
 
