@@ -3,6 +3,7 @@
 namespace DigitalPioneers\PheanstalkBundle\Tests\Helper;
 
 use DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\DataTransformer\AbstractDataTransformer;
+use DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\TubeCollection;
 use DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\Tubes\AbstractTube;
 use DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\Worker\AbstractWorker;
 use PHPUnit_Framework_TestCase;
@@ -24,9 +25,10 @@ class MockGenerator
     }
 
     /**
+     * @param AbstractWorker $worker will return a specific worker when given
      * @return AbstractTube
      */
-    public function getTubeMock()
+    public function getTubeMock($worker = null)
     {
         $tube = $this->context->getMockForAbstractClass(
             '\DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\Tubes\AbstractTube'
@@ -46,9 +48,15 @@ class MockGenerator
         $tube->expects($this->context->any())
             ->method('getDataTransformer')
             ->will($this->context->returnValue($this->getDataTransformerMock()));
-        $tube->expects($this->context->any())
-            ->method('getWorker')
-            ->will($this->context->returnValue($this->getWorkerMock()));
+        if (isset($worker)) {
+            $tube->expects($this->context->any())
+                ->method('getWorker')
+                ->will($this->context->returnValue($worker));
+        } else {
+            $tube->expects($this->context->any())
+                ->method('getWorker')
+                ->will($this->context->returnValue($this->getWorkerMock()));
+        }
 
         return $tube;
     }
@@ -88,11 +96,12 @@ class MockGenerator
     }
 
     /**
-     * @return \Monolog\Logger
+     * @return \Symfony\Bridge\Monolog\Logger
      */
     public function getLoggerMock()
     {
-        return $this->context->getMockBuilder('\Monolog\Logger')->disableOriginalConstructor()->getMock();
+        return $this->context->getMockBuilder('\Symfony\Bridge\Monolog\Logger')
+            ->disableOriginalConstructor()->getMock();
     }
 
     /**
@@ -101,6 +110,27 @@ class MockGenerator
     public function getPheanstalkMock()
     {
         return $this->context->getMockBuilder('\Pheanstalk\Pheanstalk')->disableOriginalConstructor()->getMock();
+    }
+
+    /**
+     * @param array $tubes all tubes which should be registered witin the TubeCollection
+     * @return TubeCollection
+     */
+    public function getTubeColletionMock($tubes)
+    {
+        $tubeCollection = $this->context->getMockBuilder(
+            '\DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\TubeCollection'
+        )->disableOriginalConstructor()->getMock();
+
+        $collection = new \SplObjectStorage();
+        foreach ($tubes as $tube) {
+            $collection->attach($tube);
+        }
+        $tubeCollection->expects($this->context->any())
+            ->method('getCollection')
+            ->will($this->context->returnValue($collection));
+
+        return $tubeCollection;
     }
 }
 
