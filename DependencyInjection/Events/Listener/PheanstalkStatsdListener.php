@@ -108,8 +108,8 @@ class PheanstalkStatsdListener
      */
     public function onMaxRetriesReached(JobFailedEvent $event)
     {
-        $this->statisticsClient[] = "->increment('Worker.jobs.max_retries')";
-        $this->statisticsClient[] = "->increment('Worker.jobs.max_retries.' . $event->getTube())";
+        $this->statsd->increment('Worker.jobs.max_retries');
+        $this->statsd->increment('Worker.jobs.max_retries.' . $event->getTube());
     }
 
     /**
