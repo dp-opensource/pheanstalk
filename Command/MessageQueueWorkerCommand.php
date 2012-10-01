@@ -2,9 +2,11 @@
 namespace DigitalPioneers\PheanstalkBundle\Command;
 
 use DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\PheanstalkEvents;
+use DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\JobDoneEvent;
+use DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\JobFailedEvent;
 use DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\TimeEvent;
 use DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\GetContainerEvent;
-use DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\JobDoneEvent;
+use DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\JobMaxRetriesReachedEvent;
 use DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\WaitingTimeEvent;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Command\Command;
@@ -54,11 +56,13 @@ class MessageQueueWorkerCommand extends ContainerAwareCommand
 
         $worker = array();
         $dataTransformer = array();
+        $maxRetries = array();
         $output->writeln('setting up tubes');
         foreach ($tubeCollection->getCollection() as $tube) {
             /* @var $tube \DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\Tubes\AbstractTube */
             $worker[$tube->getName()] = $tube->getWorker();
             $dataTransformer[$tube->getName()] = $tube->getDataTransformer();
+            $maxRetries[$tube->getName()] = $tube->getMaxRetries();
             $pheanstalk->watch($tube->getName());
             $output->writeln(sprintf('Watching: %s', $tube->getName()));
         }
@@ -73,14 +77,30 @@ class MessageQueueWorkerCommand extends ContainerAwareCommand
             $dispatcher->dispatch(PheanstalkEvents::WAITING_TIME, new WaitingTimeEvent($waitingTime * 1000));
             $workload = json_decode($job->getData());
             $output->write(sprintf(' got a job! [%s] Start heavy computing...', $workload->tube));
-            $worker[$workload->tube]->processJob(
-                $dataTransformer[$workload->tube]->wakeupData($workload->data),
-                $job,
-                $pheanstalk,
-                $workload->tube,
-                $output,
-                $logger
-            );
+            if ($pheanstalk->statsJob($job)->__get('releases') <= $maxRetries[$workload->tube]) {
+                $worker[$workload->tube]->processJob(
+                    $workload,
+                    $dataTransformer[$workload->tube],
+                    $job,
+                    $pheanstalk,
+                    $output,
+                    $logger
+                );
+            } else {
+                $pheanstalk->delete($job);
+                $message = sprintf(
+                    '[Pheanstalk] A job from the tube [%s] has reached maximum retries and has been discarded.',
+                    $workload->tube
+                );
+                $logger->emerg($message);
+                $output->writeln(' Error!');
+                $output->writeln('Job has reached maximum retries and has been discarded!');
+                $dispatcher->dispatch(
+                    PheanstalkEvents::JOB_MAX_RETRIES_REACHED,
+                    new JobMaxRetriesReachedEvent($workload->tube, $workload, $dataTransformer[$workload->tube])
+                );
+                $dispatcher->dispatch(PheanstalkEvents::JOB_FAILED, new JobFailedEvent($workload->tube, false));
+            }
             $dispatcher->dispatch(PheanstalkEvents::JOB_DONE, new JobDoneEvent($workload->tube, microtime(true)));
         }
         $dispatcher->dispatch(PheanstalkEvents::DONE, new TimeEvent(microtime(true)));

@@ -222,6 +222,7 @@ To register a listener you will have to register them as services and tag them p
     <tag name="kernel.event_listener" event="pheanstalk.waiting_time" method="onWaitingTime" />
     <tag name="kernel.event_listener" event="pheanstalk.jobs.started" method="onJobStarted" />
     <tag name="kernel.event_listener" event="pheanstalk.jobs.success" method="onJobSuccess" />
+    <tag name="kernel.event_listener" event="pheanstalk.jobs.max_retries_reached" method="onMaxRetriesReached" />
     <tag name="kernel.event_listener" event="pheanstalk.jobs.failed" method="onJobFailed" />
     <tag name="kernel.event_listener" event="pheanstalk.jobs.done" method="onJobDone" />
     <tag name="kernel.event_listener" event="pheanstalk.get_container" method="onGetContainer" />

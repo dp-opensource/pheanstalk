@@ -109,7 +109,16 @@ class MockGenerator
      */
     public function getPheanstalkMock()
     {
-        return $this->context->getMockBuilder('\Pheanstalk\Pheanstalk')->disableOriginalConstructor()->getMock();
+        $arrayResponse = $this->context->getMockBuilder('\Pheanstalk\Response\ArrayResponse')
+            ->disableOriginalConstructor()->getMock();
+        $arrayResponse->expects($this->context->any())
+            ->method('__get')
+            ->will($this->context->returnValue(0));
+        $pheanstalk = $this->context->getMockBuilder('\Pheanstalk\Pheanstalk')->disableOriginalConstructor()->getMock();
+        $pheanstalk->expects($this->context->any())
+            ->method('statsJob')
+            ->will($this->context->returnValue($arrayResponse));
+        return $pheanstalk;
     }
 
     /**

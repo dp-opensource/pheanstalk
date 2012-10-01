@@ -90,12 +90,24 @@ class PheanstalkStatisticsListener
     public function onJobFailed(JobFailedEvent $event)
     {
         $this->statisticsClient[] = "->increment('Worker.jobs.failed')";
-        $this->statisticsClient[] = "->increment('Worker.jobs.failed' . $event->getTube())";
+        $this->statisticsClient[] = "->increment('Worker.jobs.failed.' . $event->getTube())";
         if ($event->isRetried()) {
             $this->statisticsClient[] = "->increment('Worker.jobs.failed.retried')";
         } else {
             $this->statisticsClient[] = "->increment('Worker.jobs.failed.deleted')";
         }
+    }
+
+    /**
+     * Increases "Worker.jobs.max_retries" and "Worker.jobs.max_retries.{tube-identifier}"
+     * Gets triggered when a job reaches its maximum retries defined by the tube
+     *
+     * @param \DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\JobFailedEvent $event
+     */
+    public function onMaxRetriesReached(JobFailedEvent $event)
+    {
+        $this->statisticsClient[] = "->increment('Worker.jobs.max_retries')";
+        $this->statisticsClient[] = "->increment('Worker.jobs.max_retries.' . $event->getTube())";
     }
 
     /**

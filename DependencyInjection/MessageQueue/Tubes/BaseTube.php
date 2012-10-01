@@ -58,6 +58,16 @@ class BaseTube extends AbstractTube
      */
     protected $tr = 10;
 
+    /**
+     * how often a job is allowed to retry before it is being discarded
+     *
+     * @var integer
+     */
+    protected $maxRetries = 50;
+
+    /**
+     * @inheritdoc
+     */
     final public function __construct(AbstractDataTransformer $transform, AbstractWorker $worker)
     {
         $this->transform = $transform;
@@ -102,6 +112,16 @@ class BaseTube extends AbstractTube
     final public function getTtr()
     {
         return $this->tr;
+    }
+
+    /**
+     * Returns maxRetries
+     *
+     * @return int
+     */
+    final public function getMaxRetries()
+    {
+        return $this->maxRetries;
     }
 
     /**

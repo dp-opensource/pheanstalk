@@ -54,6 +54,14 @@ abstract class AbstractTube
     abstract public function getTtr();
 
     /**
+     * returns how often a job in this tube is allowed to retry before it is being discarded
+     *
+     * @abstract
+     * @return integer
+     */
+    abstract public function getMaxRetries();
+
+    /**
      * @abstract
      * @return AbstractDataTransformer
      */

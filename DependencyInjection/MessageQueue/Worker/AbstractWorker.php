@@ -2,6 +2,7 @@
 namespace DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\Worker;
 
 use DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\PheanstalkEvents;
+use DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\DataTransformer\AbstractDataTransformer;
 use DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\JobFailedEvent;
 use DigitalPioneers\PheanstalkBundle\DependencyInjection\Events\JobSuccessEvent;
 use DigitalPioneers\PheanstalkBundle\DependencyInjection\MessageQueue\Exceptions\NoRetryException;
@@ -35,13 +36,15 @@ abstract class AbstractWorker
      * @param \Symfony\Bridge\Monolog\Logger $logger
      */
     public function processJob(
-        $data,
+        $workload,
+        AbstractDataTransformer $dataTransformer,
         \Pheanstalk\Job $job,
         \Pheanstalk\Pheanstalk $pheanstalk,
-        $tubeIdentifier,
         OutputInterface $output,
         \Symfony\Bridge\Monolog\Logger $logger
     ) {
+        $data = $dataTransformer->wakeupData($workload->data);
+        $tubeIdentifier = $workload->tube;
         $dispatcher = new EventDispatcher();
         try {
             $this->work($data, $job, $pheanstalk);

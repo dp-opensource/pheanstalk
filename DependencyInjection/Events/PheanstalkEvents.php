@@ -27,6 +27,10 @@ final class PheanstalkEvents
      */
     const JOB_FAILED = 'pheanstalk.jobs.failed';
     /**
+     * The pheanstalk.jobs.max_retries_reached event is thrown each time a job has been retried
+     */
+    const JOB_MAX_RETRIES_REACHED = 'pheanstalk.jobs.max_retries_reached';
+    /**
      * The pheanstalk.jobs.done event is thrown each time a job is done.
      */
     const JOB_DONE = 'pheanstalk.jobs.done';
