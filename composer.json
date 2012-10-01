@@ -4,18 +4,12 @@
     "description": "A simple pheanstalk-bundle for Symfony",
     "keywords": ["beanstalkd", "pheanstalk", "queue"],
     "homepage": "http://www.digitalpioneers.de",
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/drymek/PheanstalkBundle.git"
-        }
-    ],
     "require": {
         "php": ">=5.3.1",
         "symfony/symfony": "2.1.*",
         "symfony/monolog-bundle": "2.1.*",
         "mrpoundsign/pheanstalk-5.3": "*",
-        "drymek/PheanstalkBundle": "*",
+        "drymek/pheanstalk-bundle": "*",
         "symfony/event-dispatcher": "*"
     },
     "autoload": {
