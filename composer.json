@@ -1,5 +1,5 @@
 {
-    "name": "DigitalPioneers/PheanstalkBundle",
+    "name": "digital-pioneers/pheanstalk-bundle",
     "type": "symfony-bundle",
     "description": "A simple pheanstalk-bundle for Symfony",
     "keywords": ["beanstalkd", "pheanstalk", "queue"],
