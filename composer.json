@@ -2,6 +2,7 @@
     "name": "digital-pioneers/pheanstalk-bundle",
     "type": "symfony-bundle",
     "description": "A simple pheanstalk-bundle for Symfony",
+    "license": "GPL-3.0+",
     "keywords": ["beanstalkd", "pheanstalk", "queue"],
     "homepage": "http://www.digitalpioneers.de",
     "require": {
