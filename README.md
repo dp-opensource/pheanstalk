@@ -111,41 +111,22 @@ public function registerBundles()
 ## Symfony 2.1
 
 ### I. Install the dependencies
-#### A) Register packages as repositories
 
-As the drymek/PheanstalkBundle and our bundle have not yet found their way into packagist you will have to register these as packages first.
-Register the `drymek/PheanstalkBundle` and this bundle as repository by adding the following lines to your `composer.json`:
-``` json
-{
-    "repositories": [
-        {
-            "type": "git",
-            "url": "https://github.com/digitalpioneers/pheanstalk.git"
-        },
-        {
-            "type": "git",
-            "url": "https://github.com/drymek/PheanstalkBundle.git"
-        }
-    ]
-}
-```
-For a more detailed explanation on vcs-repositories take a look at the [official documentation](http://getcomposer.org/doc/05-repositories.md#vcs).
-
-#### B) Add the bundles
-
-Add our bundle to your `composer.json` by adding this bundle to the require-section of your `composer.json`:
+This bundle is available as a package in packagist. You simply have to add `digital-pioneers/pheanstalk-bundle` to the `require`-section of your `composer.json`.
 
 ``` json
 {
     "require": {
-        "digitalpioneers/pheanstalk": "*"
+        "digital-pioneers/pheanstalk-bundle": "*"
     }
 }
 ```
 
-#### C) Install dependencies
+Now, run the vendors script to download the client:
 
-To install our bundle and all dependencies run `php composer.phar install`.
+``` bash
+php composer.phar install
+```
 
 ### II. Enable the bundles
 
